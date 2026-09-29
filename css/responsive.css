@@ -1,0 +1,169 @@
+/* =========================================================================
+   HOME FINANCE PRO - RESPONSIVE DESIGN SYSTEM
+   File: css/responsive.css
+   Covers: Desktops (1400px+), Laptops (1024px-1399px), and Tablets (769px-1023px)
+   ========================================================================= */
+
+/* ----------------------------------------------------
+   1. Ultra-Wide & Large Desktop Displays (>= 1400px)
+   ---------------------------------------------------- */
+@media (min-width: 1400px) {
+  :root {
+    --sidebar-width: 280px;
+  }
+
+  .content-body {
+    max-width: 1600px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 36px 40px;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+
+  .analytics-grid {
+    grid-template-columns: 2.2fr 1fr;
+    gap: 28px;
+  }
+
+  .chart-container {
+    height: 320px;
+  }
+}
+
+/* ----------------------------------------------------
+   2. Standard Laptops & Desktops (1024px - 1399px)
+   ---------------------------------------------------- */
+@media (max-width: 1399px) and (min-width: 1024px) {
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .analytics-grid {
+    grid-template-columns: 1.6fr 1fr;
+    gap: 20px;
+  }
+
+  .chart-container {
+    height: 290px;
+  }
+
+  .search-input-box {
+    width: 200px;
+  }
+}
+
+/* ----------------------------------------------------
+   3. Tablet Landscape & Portrait (769px - 1023px)
+   ---------------------------------------------------- */
+@media (max-width: 1023px) and (min-width: 769px) {
+  :root {
+    --sidebar-width: 220px;
+  }
+
+  .topbar {
+    padding: 0 20px;
+  }
+
+  .content-body {
+    padding: 24px 20px;
+  }
+
+  /* Reflow Metrics to 2 Columns */
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  /* Stack Analytics Charts Vertically */
+  .analytics-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .chart-container {
+    height: 270px;
+  }
+
+  /* Table Toolbar Flex Wrapping */
+  .table-toolbar {
+    padding: 16px 20px;
+    gap: 14px;
+  }
+
+  .filter-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .search-input-box {
+    flex: 1;
+    min-width: 180px;
+  }
+
+  /* Loans Cards */
+  .loans-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  /* Topbar Adjustments */
+  .month-picker-wrap input {
+    font-size: 0.82rem;
+  }
+
+  .page-title {
+    font-size: 1.15rem;
+  }
+
+  /* Modal Sizing on Tablet */
+  .modal-box {
+    max-width: 580px;
+    width: 90%;
+  }
+}
+
+/* ----------------------------------------------------
+   4. Universal Responsive Helpers
+   ---------------------------------------------------- */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+.table-responsive::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+/* Dynamic Text Truncation */
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Hide on Desktop / Tablet utility */
+.hide-desktop {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .hide-desktop {
+    display: flex !important;
+  }
+  .hide-mobile {
+    display: none !important;
+  }
+}
