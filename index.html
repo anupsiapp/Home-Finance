@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Finance Pro - Personal & Household Wealth Manager</title>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- App Styles -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/mobile.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-icon">
+          <i data-lucide="wallet-cards"></i>
+        </div>
+        <div>
+          <div class="brand-title">Home Finance</div>
+          <div class="brand-subtitle">Household Wealth Manager</div>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <a class="nav-item active" data-view="dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" data-view="transactions">
+          <i data-lucide="arrow-left-right"></i>
+          <span>All Transactions</span>
+        </a>
+        <a class="nav-item" data-view="income">
+          <i data-lucide="trending-up"></i>
+          <span>Income Inflows</span>
+        </a>
+        <a class="nav-item" data-view="expenses">
+          <i data-lucide="shopping-bag"></i>
+          <span>Expenses & Housing</span>
+        </a>
+        <a class="nav-item" data-view="loans">
+          <i data-lucide="hand-coins"></i>
+          <span>Loans & Liabilities</span>
+        </a>
+        <a class="nav-item" data-view="budgets">
+          <i data-lucide="target"></i>
+          <span>Monthly Budgets</span>
+        </a>
+        <a class="nav-item" data-view="users">
+          <i data-lucide="users"></i>
+          <span>User Management</span>
+        </a>
+        <a class="nav-item" data-view="settings">
+          <i data-lucide="settings"></i>
+          <span>Settings & Sync</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="connection-badge" id="connStatusBadge" title="Click to view Google Apps Script connection settings">
+          <span class="status-dot demo" id="statusDot"></span>
+          <span id="connStatusText">Status: Initializing</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <main class="main-wrapper">
+      
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle-btn" id="menuToggleBtn">
+            <i data-lucide="menu"></i>
+          </button>
+          <h1 class="page-title" id="pageTitle">Financial Dashboard</h1>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Month Selector -->
+          <div class="month-picker-wrap">
+            <i data-lucide="calendar" style="width: 16px; height: 16px; color: var(--text-muted);"></i>
+            <input type="month" id="globalMonthPicker">
+          </div>
+
+          <!-- Add Transaction Button -->
+          <button class="btn-primary" id="openAddTxnBtn">
+            <i data-lucide="plus-circle" style="width: 18px; height: 18px;"></i>
+            <span>Add Transaction</span>
+          </button>
+
+          <!-- User Profile & Distinct Logout Button -->
+          <div class="user-controls-wrap">
+            <div class="user-profile-badge">
+              <div class="user-avatar" id="userAvatar">A</div>
+              <span id="userNameDisplay" style="font-size: 0.88rem; font-weight: 500;">Administrator</span>
+            </div>
+            <button class="btn-logout" id="logoutBtn" onclick="App.logout()" title="Sign out from dashboard">
+              <i data-lucide="log-out" style="width: 15px; height: 15px;"></i>
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- BODY CONTENT -->
+      <div class="content-body">
+        
+        <!-- ========================================== -->
+        <!-- VIEW 1: DASHBOARD -->
+        <!-- ========================================== -->
+        <section class="view-section active-view" id="view-dashboard">
+          
+          <!-- KPI Cards Grid -->
+          <div class="metrics-grid">
+            <div class="metric-card balance">
+              <div class="metric-header">
+                <span class="metric-label">Net Balance (Surplus)</span>
+                <div class="metric-icon-box blue"><i data-lucide="wallet"></i></div>
+              </div>
+              <div class="metric-value" id="kpiNetBalance">₹0</div>
+              <div class="metric-footer">
+                <i data-lucide="shield-check" style="width: 14px; height: 14px; color: #60A5FA;"></i>
+                <span>Available cumulative liquid reserves</span>
+              </div>
+            </div>
+
+            <div class="metric-card income">
+              <div class="metric-header">
+                <span class="metric-label">Monthly Inflow</span>
+                <div class="metric-icon-box green"><i data-lucide="arrow-down-left"></i></div>
+              </div>
+              <div class="metric-value" id="kpiMonthIncome">₹0</div>
+              <div class="metric-footer">
+                <i data-lucide="trending-up" style="width: 14px; height: 14px; color: #34D399;"></i>
+                <span>Salary, consulting & yield earnings</span>
+              </div>
+            </div>
+
+            <div class="metric-card expense">
+              <div class="metric-header">
+                <span class="metric-label">Monthly Expenditure</span>
+                <div class="metric-icon-box red"><i data-lucide="arrow-up-right"></i></div>
+              </div>
+              <div class="metric-value" id="kpiMonthExpense">₹0</div>
+              <div class="metric-footer">
+                <i data-lucide="shopping-cart" style="width: 14px; height: 14px; color: #F87171;"></i>
+                <span>Housing, supplies, utilities & EMIs</span>
+              </div>
+            </div>
+
+            <div class="metric-card loan">
+              <div class="metric-header">
+                <span class="metric-label">Active Liabilities & Debt</span>
+                <div class="metric-icon-box amber"><i data-lucide="credit-card"></i></div>
+              </div>
+              <div class="metric-value" id="kpiActiveLoans">₹0</div>
+              <div class="metric-footer">
+                <i data-lucide="alert-circle" style="width: 14px; height: 14px; color: #FBBF24;"></i>
+                <span id="kpiLoanSubtitle">Total Outstanding Obligations</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Grid -->
+          <div class="analytics-grid">
+            <div class="chart-card">
+              <div class="chart-card-header">
+                <h3 class="card-title">
+                  <i data-lucide="bar-chart-3" style="width: 20px; height: 20px; color: var(--accent-primary);"></i>
+                  Cash Flow Trends (Inflows vs Outflows)
+                </h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="cashFlowChart"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-card-header">
+                <h3 class="card-title">
+                  <i data-lucide="pie-chart" style="width: 20px; height: 20px; color: var(--accent-purple);"></i>
+                  Expenditure Distribution by Category
+                </h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="categoryDonutChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Transactions Card -->
+          <div class="data-card">
+            <div class="table-toolbar">
+              <h3 class="card-title">
+                <i data-lucide="clock" style="width: 18px; height: 18px; color: var(--accent-cyan);"></i>
+                Recent Activity Log
+              </h3>
+              <button class="btn-secondary" onclick="App.switchView('transactions')">
+                View All
+              </button>
+            </div>
+            <div style="overflow-x: auto;">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Category</th>
+                    <th>Payment Method</th>
+                    <th>Counterparty</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboardRecentTxnTable"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: ALL TRANSACTIONS -->
+        <!-- ========================================== -->
+        <section class="view-section" id="view-transactions">
+          <div class="data-card">
+            <div class="table-toolbar">
+              <div class="filter-group">
+                <div class="search-input-box">
+                  <i data-lucide="search" style="width: 16px; height: 16px; color: var(--text-dim);"></i>
+                  <input type="text" id="txnSearchInput" placeholder="Search transactions...">
+                </div>
+
+                <select class="filter-select" id="txnTypeFilter">
+                  <option value="">All Transaction Types</option>
+                  <option value="Income">Income (Inflow)</option>
+                  <option value="Expense">Expense (Outflow)</option>
+                  <option value="Rent">Housing & Rent</option>
+                  <option value="Loan">Loan / EMI Repayment</option>
+                </select>
+
+                <select class="filter-select" id="txnCategoryFilter">
+                  <option value="">All Categories</option>
+                </select>
+              </div>
+
+              <div class="filter-group">
+                <button class="btn-secondary" id="exportCsvBtn">
+                  <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+                  <span>Export CSV</span>
+                </button>
+                <button class="btn-primary" onclick="App.openAddTransactionModal()">
+                  <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                  <span>New Entry</span>
+                </button>
+              </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Category & Classification</th>
+                    <th>Counterparty</th>
+                    <th>Payment Method</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="allTxnTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 3: INCOME INFLOWS -->
+        <!-- ========================================== -->
+        <section class="view-section" id="view-income">
+          <div class="metrics-grid">
+            <div class="metric-card income">
+              <div class="metric-header">
+                <span class="metric-label">Cumulative Inflows</span>
+                <div class="metric-icon-box green"><i data-lucide="wallet"></i></div>
+              </div>
+              <div class="metric-value" id="incomeViewTotal">₹0</div>
+              <div class="metric-footer">
+                <span>Consolidated revenue received across all channels</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="data-card">
+            <div class="table-toolbar">
+              <h3 class="card-title">
+                <i data-lucide="trending-up" style="width: 18px; height: 18px; color: var(--accent-success);"></i>
+                Income History & Revenue Sources
+              </h3>
+              <button class="btn-primary" onclick="App.openAddTransactionModal('Income')">
+                <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                <span>Record Income</span>
+              </button>
+            </div>
+            <div style="overflow-x: auto;">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Income Stream</th>
+                    <th>Received From</th>
+                    <th>Method</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody id="incomeTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 4: EXPENSES & HOUSING -->
+        <!-- ========================================== -->
+        <section class="view-section" id="view-expenses">
+          <div class="metrics-grid">
+            <div class="metric-card expense">
+              <div class="metric-header">
+                <span class="metric-label">Total Cumulative Expenditure</span>
+                <div class="metric-icon-box red"><i data-lucide="shopping-bag"></i></div>
+              </div>
+              <div class="metric-value" id="expenseViewTotal">₹0</div>
+              <div class="metric-footer">
+                <span>Housing, supplies, utilities and maintenance</span>
+              </div>
+            </div>
+
+            <div class="metric-card" style="border-left: 3px solid var(--accent-warning);">
+              <div class="metric-header">
+                <span class="metric-label">Housing & Lease Spend</span>
+                <div class="metric-icon-box amber"><i data-lucide="home"></i></div>
+              </div>
+              <div class="metric-value" id="rentViewTotal">₹0</div>
+              <div class="metric-footer">
+                <span>Apartment rent and community maintenance fees</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="data-card">
+            <div class="table-toolbar">
+              <h3 class="card-title">
+                <i data-lucide="list-ordered" style="width: 18px; height: 18px; color: var(--accent-danger);"></i>
+                Household Expenses & Housing Records
+              </h3>
+              <button class="btn-primary" onclick="App.openAddTransactionModal('Expense')">
+                <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                <span>Record Expense</span>
+              </button>
+            </div>
+            <div style="overflow-x: auto;">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Payee / Vendor</th>
+                    <th>Method</th>
+                    <th>Notes</th>
+                    <th>Amount</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="expenseTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 5: LOANS & LIABILITIES -->
+        <!-- ========================================== -->
+        <section class="view-section" id="view-loans">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+              <h2 style="font-size: 1.2rem; font-weight: 700;">Loans, Liabilities & Receivables Tracker</h2>
+              <p style="font-size: 0.82rem; color: var(--text-muted);">Manage borrowed debt, personal advances, and scheduled repayment installments.</p>
+            </div>
+            <button class="btn-primary" onclick="App.openAddLoanModal()">
+              <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+              <span>Add Loan / Liability</span>
+            </button>
+          </div>
+
+          <!-- Active Loans Cards -->
+          <div class="loans-grid" id="loansCardsContainer"></div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 6: BUDGETS -->
+        <!-- ========================================== -->
+        <section class="view-section" id="view-budgets">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+              <h2 style="font-size: 1.2rem; font-weight: 700;">Monthly Budget Limits & Variance</h2>
+              <p style="font-size: 0.82rem; color: var(--text-muted);">Establish category-level monthly spending thresholds to enforce fiscal discipline.</p>
+            </div>
+            <button class="btn-primary" onclick="App.openSetBudgetModal()">
+              <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+              <span>Establish Budget Limit</span>
+            </button>
+          </div>
+
+          <div class="data-card">
+            <div style="padding: 24px;" id="budgetListContainer"></div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 7: USERS -->
+        <!-- ========================================== -->
+        <section class="view-section" id="view-users">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+              <h2 style="font-size: 1.2rem; font-weight: 700;">User Accounts & Access Control</h2>
+              <p style="font-size: 0.82rem; color: var(--text-muted);">Manage team members, roles, and access credentials.</p>
+            </div>
+            <button class="btn-primary" onclick="App.openAddUserModal()">
+              <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+              <span>Add New User</span>
+            </button>
+          </div>
+
+          <div class="data-card">
+            <div style="overflow-x: auto;">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>User ID</th>
+                    <th>Username</th>
+                    <th>Full Name</th>
+                    <th>Role</th>
+                    <th>Created At</th>
+                    <th>Last Login</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 8: SETTINGS & GOOGLE SHEET SYNC -->
+        <!-- ========================================== -->
+        <section class="view-section" id="view-settings">
+          <div class="chart-card" style="margin-bottom: 24px;">
+            <h3 class="card-title" style="margin-bottom: 14px;">
+              <i data-lucide="sheet" style="width: 20px; height: 20px; color: #10B981;"></i>
+              Google Apps Script Backend URL Integration
+            </h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 18px;">
+              Provide the deployed <strong>Web App URL</strong> from your Google Apps Script editor. This binds your web application interface directly with your private Google Spreadsheet database for secure, real-time data persistence.
+            </p>
+
+            <div class="form-group">
+              <label class="form-label">Google Apps Script Deployed Web App URL:</label>
+              <input type="text" class="form-input" id="settingsGasUrlInput" placeholder="https://script.google.com/macros/s/AKfycb.../exec">
+            </div>
+
+            <div style="display: flex; gap: 12px;">
+              <button class="btn-primary" id="saveGasUrlBtn">
+                <i data-lucide="save" style="width: 16px; height: 16px;"></i>
+                <span>Save & Connect</span>
+              </button>
+              <button class="btn-secondary" id="testGasUrlBtn">
+                <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i>
+                <span>Test Connectivity</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Step-by-Step Setup Guide Card -->
+          <div class="chart-card">
+            <h3 class="card-title" style="margin-bottom: 14px;">
+              <i data-lucide="help-circle" style="width: 20px; height: 20px; color: var(--accent-warning);"></i>
+              Deployment & Setup Reference
+            </h3>
+            <ol style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.8; padding-left: 20px;">
+              <li>Create a fresh <strong>Google Spreadsheet</strong> (<a href="https://sheets.new" target="_blank" style="color: #60A5FA;">sheets.new</a>).</li>
+              <li>Navigate to <strong>Extensions &gt; Apps Script</strong> from the top menu bar.</li>
+              <li>Create two script files: <code>Setup.gs</code> and <code>Code.gs</code> using the source files in our project folder.</li>
+              <li>Run the <code>initialSetup</code> function in <code>Setup.gs</code> once to automatically format and configure all database sheets.</li>
+              <li>Click <strong>Deploy &gt; New deployment</strong>:
+                <ul style="margin-left: 20px; list-style-type: circle;">
+                  <li>Type: <strong>Web App</strong></li>
+                  <li>Execute as: <strong>Me (your-account@gmail.com)</strong></li>
+                  <li>Who has access: <strong>Anyone</strong> (necessary for cross-origin browser fetch access)</li>
+                </ul>
+              </li>
+              <li>Copy the generated <strong>Web app URL</strong>, paste it into the field above, and click <strong>Save & Connect</strong>.</li>
+            </ol>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- MOBILE BOTTOM NAVIGATION DOCK (Native Mobile App Experience) -->
+    <nav class="mobile-bottom-nav hide-desktop" id="mobileBottomNav">
+      <a class="mobile-nav-item active" data-view="dashboard">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Home</span>
+      </a>
+      <a class="mobile-nav-item" data-view="transactions">
+        <i data-lucide="arrow-left-right"></i>
+        <span>Ledger</span>
+      </a>
+      <button class="mobile-fab-btn" id="mobileFabBtn" title="Add Transaction" onclick="App.openAddTransactionModal()">
+        <i data-lucide="plus"></i>
+      </button>
+      <a class="mobile-nav-item" data-view="loans">
+        <i data-lucide="hand-coins"></i>
+        <span>Loans</span>
+      </a>
+      <a class="mobile-nav-item" id="mobileMenuOpenBtn">
+        <i data-lucide="menu"></i>
+        <span>More</span>
+      </a>
+    </nav>
+
+    <!-- MOBILE SIDEBAR BACKDROP OVERLAY -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: ADD / EDIT TRANSACTION -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="addTxnModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="txnModalTitle">Record Transaction</h3>
+        <button class="modal-close-btn" onclick="App.closeModals()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="txnForm">
+          <input type="hidden" id="txnEditId">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Classification Type</label>
+              <select class="form-select" id="formTxnType" required>
+                <option value="Expense">Expense (Outflow)</option>
+                <option value="Income">Income (Inflow)</option>
+                <option value="Rent">Housing & Rent</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Transaction Date</label>
+              <input type="date" class="form-input" id="formTxnDate" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select class="form-select" id="formTxnCategory" required></select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Amount (₹)</label>
+              <input type="number" step="any" class="form-input" id="formTxnAmount" placeholder="e.g. 5000" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Payment Method</label>
+              <select class="form-select" id="formTxnPayMode">
+                <option value="UPI">UPI (GPay / PhonePe / Paytm)</option>
+                <option value="Bank Transfer">Bank Transfer (NEFT / IMPS)</option>
+                <option value="Credit Card">Credit Card</option>
+                <option value="Debit Card">Debit Card</option>
+                <option value="Cash">Cash</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Payee / Counterparty</label>
+              <input type="text" class="form-input" id="formTxnPaidToFrom" placeholder="e.g. Landlord, Retailer, Employer">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Sub-Category (Optional)</label>
+            <input type="text" class="form-input" id="formTxnSubCategory" placeholder="e.g. Monthly Lease, Vehicle Fuel">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description / Remarks</label>
+            <textarea class="form-textarea" id="formTxnDesc" rows="2" placeholder="Specific notes or contextual details..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="App.closeModals()">Cancel</button>
+        <button type="submit" form="txnForm" class="btn-primary" id="saveTxnBtn">
+          <i data-lucide="check" style="width: 16px; height: 16px;"></i>
+          <span>Save Transaction</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: ADD LOAN / LIABILITY -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="addLoanModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Record Loan / Obligation</h3>
+        <button class="modal-close-btn" onclick="App.closeModals()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="loanForm">
+          <div class="form-group">
+            <label class="form-label">Obligation Title</label>
+            <input type="text" class="form-input" id="formLoanTitle" placeholder="e.g. Vehicle Financing, Mortgage, Personal Advance" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Institution / Counterparty</label>
+              <input type="text" class="form-input" id="formLoanBank" placeholder="e.g. HDFC Bank, Private Lender" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Obligation Nature</label>
+              <select class="form-select" id="formLoanType">
+                <option value="Loan Taken">Loan Taken (Payable Liability)</option>
+                <option value="Loan Given">Loan Given (Receivable Asset)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Total Principal Amount (₹)</label>
+              <input type="number" step="any" class="form-input" id="formLoanTotal" placeholder="e.g. 50000" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Disbursed / Repaid To Date (₹)</label>
+              <input type="number" step="any" class="form-input" id="formLoanPaid" value="0">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Monthly Installment (EMI) (₹)</label>
+              <input type="number" step="any" class="form-input" id="formLoanEmi" placeholder="e.g. 3200">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Due Day of Month</label>
+              <input type="number" class="form-input" id="formLoanDueDay" min="1" max="31" value="5">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Terms & Notes</label>
+            <textarea class="form-textarea" id="formLoanNotes" rows="2" placeholder="Interest rate, tenure, and conditions..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="App.closeModals()">Cancel</button>
+        <button type="submit" form="loanForm" class="btn-primary">Save Obligation</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: REPAY LOAN / EMI -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="repayLoanModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Record Installment Repayment</h3>
+        <button class="modal-close-btn" onclick="App.closeModals()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="repayForm">
+          <input type="hidden" id="repayLoanId">
+
+          <p id="repayLoanInfo" style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px; background: rgba(15, 23, 42, 0.4); padding: 10px; border-radius: 6px;"></p>
+
+          <div class="form-group">
+            <label class="form-label">Payment Amount (₹)</label>
+            <input type="number" step="any" class="form-input" id="repayAmount" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Payment Method</label>
+            <select class="form-select" id="repayPaymentMode">
+              <option value="UPI">UPI</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+              <option value="Cash">Cash</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="repayRecordExpense" checked style="accent-color: var(--accent-primary); width: 16px; height: 16px;">
+            <label for="repayRecordExpense" style="font-size: 0.84rem; color: var(--text-muted); cursor: pointer;">
+              Automatically record as an expense transaction in ledger
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="App.closeModals()">Cancel</button>
+        <button type="submit" form="repayForm" class="btn-primary">Submit Repayment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: SET BUDGET -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="setBudgetModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Establish Monthly Budget Allocation</h3>
+        <button class="modal-close-btn" onclick="App.closeModals()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="budgetForm">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-select" id="formBudgetCategory" required></select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Monthly Ceiling Amount (₹)</label>
+            <input type="number" step="any" class="form-input" id="formBudgetAmount" placeholder="e.g. 8000" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Notes & Constraints</label>
+            <input type="text" class="form-input" id="formBudgetNotes" placeholder="Optional allocation guidelines">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="App.closeModals()">Cancel</button>
+        <button type="submit" form="budgetForm" class="btn-primary">Save Budget</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: ADD / EDIT USER -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="addUserModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="userModalTitle">Add New User</h3>
+        <button class="modal-close-btn" onclick="App.closeModals()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="userForm">
+          <input type="hidden" id="userEditId">
+          
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <input type="text" class="form-input" id="formUserUsername" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-input" id="formUserPassword" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" class="form-input" id="formUserFullName" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Role</label>
+            <select class="form-select" id="formUserRole">
+              <option value="Admin">Admin</option>
+              <option value="Manager">Manager</option>
+              <option value="Viewer">Viewer</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="App.closeModals()">Cancel</button>
+        <button type="submit" form="userForm" class="btn-primary">Save User</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: LOGIN PANEL -->
+  <!-- ========================================== -->
+  <div class="login-screen" id="loginModal">
+    <!-- Animated Mesh Gradient Background -->
+    <div class="login-bg">
+      <div class="login-gradient-orb orb-1"></div>
+      <div class="login-gradient-orb orb-2"></div>
+      <div class="login-gradient-orb orb-3"></div>
+      <div class="login-gradient-orb orb-4"></div>
+      <div class="login-grid-overlay"></div>
+    </div>
+
+    <!-- Floating Particles -->
+    <div class="login-particles" id="loginParticles"></div>
+
+    <!-- Login Container -->
+    <div class="login-container">
+      <!-- Left Branding Panel -->
+      <div class="login-branding">
+        <div class="branding-content">
+          <div class="branding-badge">
+            <div class="branding-icon-ring">
+              <div class="branding-icon-ring ring-outer"></div>
+              <div class="branding-icon-ring ring-middle"></div>
+              <div class="branding-icon-core">
+                <i data-lucide="wallet-cards"></i>
+              </div>
+            </div>
+          </div>
+          <h1 class="branding-title">Home Finance<span class="branding-pro">PRO</span></h1>
+          <p class="branding-tagline">Next-Generation Household Wealth Intelligence Platform</p>
+          
+          <div class="branding-features">
+            <div class="feature-pill">
+              <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i>
+              <span>Bank-Grade Secure</span>
+            </div>
+            <div class="feature-pill">
+              <i data-lucide="bar-chart-3" style="width: 14px; height: 14px;"></i>
+              <span>Real-Time Analytics</span>
+            </div>
+            <div class="feature-pill">
+              <i data-lucide="cloud" style="width: 14px; height: 14px;"></i>
+              <span>Cloud Synced</span>
+            </div>
+          </div>
+
+          <div class="branding-stats">
+            <div class="stat-item">
+              <div class="stat-value">₹</div>
+              <div class="stat-label">Track Every Rupee</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <div class="stat-value">24/7</div>
+              <div class="stat-label">Always Available</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <div class="stat-value">∞</div>
+              <div class="stat-label">Unlimited Records</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Login Form Panel -->
+      <div class="login-form-panel">
+        <div class="login-card">
+          <!-- Glowing top accent -->
+          <div class="login-card-glow"></div>
+          
+          <div class="login-card-inner">
+            <!-- Header -->
+            <div class="login-header">
+              <div class="login-avatar-ring">
+                <div class="avatar-pulse"></div>
+                <div class="avatar-core">
+                  <i data-lucide="fingerprint"></i>
+                </div>
+              </div>
+              <h2 class="login-title">Welcome Back</h2>
+              <p class="login-subtitle">Enter your credentials to access the dashboard</p>
+            </div>
+
+            <!-- Form -->
+            <form id="loginForm" class="login-form">
+              <div class="login-field">
+                <div class="field-icon-wrap">
+                  <i data-lucide="user" style="width: 18px; height: 18px;"></i>
+                </div>
+                <div class="field-content">
+                  <label class="field-label" for="loginUsername">Username</label>
+                  <input type="text" class="field-input" id="loginUsername" placeholder="Enter your username" value="admin" required autocomplete="username">
+                </div>
+                <div class="field-focus-line"></div>
+              </div>
+
+              <div class="login-field">
+                <div class="field-icon-wrap">
+                  <i data-lucide="key-round" style="width: 18px; height: 18px;"></i>
+                </div>
+                <div class="field-content">
+                  <label class="field-label" for="loginPassword">Password</label>
+                  <input type="password" class="field-input" id="loginPassword" placeholder="Enter your password" value="admin123" required autocomplete="current-password">
+                </div>
+                <div class="field-focus-line"></div>
+                <button type="button" class="toggle-password-btn" onclick="this.previousElementSibling.previousElementSibling.querySelector('input').type = this.previousElementSibling.previousElementSibling.querySelector('input').type === 'password' ? 'text' : 'password'" title="Toggle visibility">
+                  <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
+                </button>
+              </div>
+
+              <button type="submit" class="login-submit-btn" id="loginSubmitBtn">
+                <span class="btn-text">Sign In to Dashboard</span>
+                <span class="btn-icon-arrow">
+                  <i data-lucide="arrow-right" style="width: 20px; height: 20px;"></i>
+                </span>
+                <div class="btn-shine"></div>
+              </button>
+            </form>
+
+            <!-- Footer -->
+            <div class="login-footer">
+              <div class="login-footer-divider">
+                <span>Default Credentials</span>
+              </div>
+              <div class="credentials-chips">
+                <span class="cred-chip" onclick="document.getElementById('loginUsername').value='admin'">
+                  <i data-lucide="user-check" style="width: 12px; height: 12px;"></i>
+                  admin
+                </span>
+                <span class="cred-chip" onclick="document.getElementById('loginPassword').value='admin123'">
+                  <i data-lucide="key" style="width: 12px; height: 12px;"></i>
+                  admin123
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Watermark -->
+        <div class="login-watermark">
+          <span>Powered by Google Sheets & Apps Script</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
